@@ -1,0 +1,1 @@
+exports.test = (req, res) => res.send('Enterprise OK');
