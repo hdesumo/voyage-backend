@@ -1,31 +1,29 @@
 // app.js
 const express = require('express');
 const cors = require('cors');
-const dotenv = require('dotenv');
-const statusRoute = require('./routes/status');
+const bodyParser = require('body-parser');
 
-// Charger les variables d'environnement
-dotenv.config();
+const statusRoutes = require('./routes/status');
+// const authRoutes = require('./routes/auth'); // à décommenter si tu as ce fichier
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Middlewares
 app.use(cors());
-app.use(express.json());
+app.use(bodyParser.json());
 
 // Routes
-const statusRoute = require('./routes/status');
-const authRoute = require('./routes/auth'); // 👈 Nouveau
+app.use('/', statusRoutes);
+// app.use('/auth', authRoutes); // exemple
 
-app.use('/', statusRoute);
-app.use('/', authRoute); // 👈 Important : ajoute cette ligne
+// Fallback route (utile pour tester en cas d'erreur 404)
+app.use('*', (req, res) => {
+  res.status(404).json({ error: 'Not Found', path: req.originalUrl });
+});
 
-// Exemple : autres routes peuvent être ajoutées ici
-// app.use('/api/users', require('./routes/users'));
-
-// Démarrer le serveur
+// Démarrage du serveur
 app.listen(PORT, () => {
-  console.log(`✅ Server running on port ${PORT}`);
+  console.log(`✅ Backend listening on port ${PORT}`);
 });
 
