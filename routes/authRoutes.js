@@ -11,7 +11,7 @@ router.post('/login/passenger', authController.loginPassenger);
 router.post('/login/admin', authController.loginAdmin);
 
 // 👑 SuperAdmin
-router.post('/login/superadmin', authController.loginSuperAdmin);
+router.post('/login/superadmin', authController.loginSuperAdmin); // ✅ Correct route
 
 // 🔒 Profil connecté
 router.get('/me', authenticate, authController.getProfile);
