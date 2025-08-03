@@ -47,17 +47,54 @@ exports.loginAdmin = async (req, res) => {
 };
 
 exports.loginSuperAdmin = async (req, res) => {
+  console.log('🚀 loginSuperAdmin appelé !');
+  console.log('📥 Body reçu:', req.body);
+  
   try {
     const { email, password } = req.body;
+    
+    console.log('🔍 Recherche SuperAdmin avec email:', email);
+    
+    // Vérifiez si le modèle SuperAdmin existe
+    if (!SuperAdmin) {
+      console.error('❌ Modèle SuperAdmin non trouvé !');
+      return res.status(500).json({ error: 'Modèle SuperAdmin manquant' });
+    }
+    
     const superadmin = await SuperAdmin.findOne({ where: { email } });
-    if (!superadmin) return res.status(404).json({ error: 'SuperAdmin not found' });
+    console.log('👤 SuperAdmin trouvé:', superadmin ? 'OUI' : 'NON');
+    
+    if (!superadmin) {
+      console.log('❌ Aucun SuperAdmin avec cet email');
+      return res.status(404).json({ error: 'SuperAdmin not found' });
+    }
 
+    console.log('🔐 Vérification du mot de passe...');
     const isValid = await bcrypt.compare(password, superadmin.password);
-    if (!isValid) return res.status(401).json({ error: 'Invalid credentials' });
+    console.log('✅ Mot de passe valide:', isValid ? 'OUI' : 'NON');
+    
+    if (!isValid) {
+      console.log('❌ Mot de passe incorrect');
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
 
+    console.log('🎟️ Génération du token...');
+    
+    // Vérifiez si generateToken existe
+    if (!generateToken) {
+      console.error('❌ Fonction generateToken non trouvée !');
+      return res.status(500).json({ error: 'generateToken manquant' });
+    }
+    
     const token = generateToken(superadmin.id, 'superadmin');
+    console.log('✅ Token généré avec succès');
+    
+    console.log('📤 Envoi de la réponse...');
     res.json({ token, superadmin });
+    
   } catch (err) {
+    console.error('💥 Erreur dans loginSuperAdmin:', err);
+    console.error('💥 Stack:', err.stack);
     res.status(500).json({ error: 'Login failed', details: err.message });
   }
 };
@@ -82,4 +119,3 @@ exports.getProfile = async (req, res) => {
     res.status(500).json({ error: 'Error fetching profile', details: err.message });
   }
 };
-
