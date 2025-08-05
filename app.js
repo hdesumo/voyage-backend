@@ -22,13 +22,13 @@ dotenv.config();
 
 const app = express();
 
-// ✅ Configuration CORS avec liste blanche
+// ✅ Configuration CORS robuste
 const allowedOrigins = [
   'https://superadmin.voyagemax.net',
   'http://localhost:5173'
 ];
 
-app.use(cors({
+const corsOptions = {
   origin: function (origin, callback) {
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
@@ -36,13 +36,16 @@ app.use(cors({
       callback(new Error('Not allowed by CORS'));
     }
   },
-  credentials: true
-}));
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true,
+  optionsSuccessStatus: 200
+};
 
+app.use(cors(corsOptions));
 app.use(helmet());
 app.use(morgan('dev'));
 app.use(express.json());
-app.options('*', cors());
 
 // Connexion à la base de données
 db.authenticate()
