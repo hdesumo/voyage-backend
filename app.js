@@ -22,7 +22,7 @@ dotenv.config();
 
 const app = express();
 
-// ✅ Configuration CORS robuste
+// ✅ 1. CORS en premier
 const allowedOrigins = [
   'https://superadmin.voyagemax.net',
   'http://localhost:5173'
@@ -33,26 +33,44 @@ const corsOptions = {
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
+      console.error('❌ CORS blocked for origin:', origin);
       callback(new Error('Not allowed by CORS'));
     }
   },
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true,
   optionsSuccessStatus: 200
 };
 
 app.use(cors(corsOptions));
+
+// ✅ 2. Headers manuels (important pour Railway)
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+    res.header('Access-Control-Allow-Origin', origin);
+  }
+  res.header('Access-Control-Allow-Credentials', 'true');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  next();
+});
+
+// ✅ 3. Autres middlewares
 app.use(helmet());
 app.use(morgan('dev'));
 app.use(express.json());
 
-// Connexion à la base de données
+// ✅ 4. Route de test (pour debug)
+app.get('/', (req, res) => {
+  res.json({ status: 'API is running.' });
+});
+
+// ✅ 5. Connexion DB
 db.authenticate()
   .then(() => console.log('✅ Connected to the database.'))
   .catch(err => console.error('❌ Database connection error:', err));
 
-// Définition des routes
+// ✅ 6. Définition des routes
 app.use('/api/auth', authRoutes);
 app.use('/api/superadmin', superAdminRoutes);
 app.use('/api/admin', adminRoutes);
@@ -65,12 +83,7 @@ app.use('/api/trips', tripRoutes);
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/auth/superadmin', authSuperAdminRoutes);
 
-// Test route
-app.get('/', (req, res) => {
-  res.json({ status: 'API is running.' });
-});
-
-// Lancement du serveur
+// ✅ 7. Lancement du serveur
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`🚀 Server is running on port ${PORT}`);
