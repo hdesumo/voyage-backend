@@ -16,6 +16,7 @@ const vehicleRoutes = require('./routes/vehicleRoutes');
 const passengerRoutes = require('./routes/passengerRoutes');
 const tripRoutes = require('./routes/tripRoutes');
 const bookingRoutes = require('./routes/bookingRoutes');
+const authSuperAdminRoutes = require('./routes/authSuperAdmin');
 
 dotenv.config();
 
@@ -41,6 +42,7 @@ app.use(cors({
 app.use(helmet());
 app.use(morgan('dev'));
 app.use(express.json());
+app.options('*', cors());
 
 // Connexion à la base de données
 db.authenticate()
@@ -58,6 +60,7 @@ app.use('/api/vehicles', vehicleRoutes);
 app.use('/api/passengers', passengerRoutes);
 app.use('/api/trips', tripRoutes);
 app.use('/api/bookings', bookingRoutes);
+app.use('/api/auth/superadmin', authSuperAdminRoutes);
 
 // Test route
 app.get('/', (req, res) => {
