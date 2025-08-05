@@ -5,7 +5,9 @@ const morgan = require('morgan');
 const dotenv = require('dotenv');
 const db = require('./config/database');
 
-// Import routes
+dotenv.config(); // Charger les variables d'environnement en premier
+
+// Import des routes
 const authRoutes = require('./routes/authRoutes');
 const superAdminRoutes = require('./routes/superAdminRoutes');
 const adminRoutes = require('./routes/adminRoutes');
@@ -18,11 +20,9 @@ const tripRoutes = require('./routes/tripRoutes');
 const bookingRoutes = require('./routes/bookingRoutes');
 const authSuperAdminRoutes = require('./routes/authSuperAdmin');
 
-dotenv.config();
-
 const app = express();
 
-// ✅ 1. CORS en premier
+// ✅ 1. CORS (en premier)
 const allowedOrigins = [
   'https://superadmin.voyagemax.net',
   'http://localhost:5173'
@@ -43,7 +43,7 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
-// ✅ 2. Headers manuels (important pour Railway)
+// ✅ 2. Headers personnalisés pour Railway
 app.use((req, res, next) => {
   const origin = req.headers.origin;
   if (allowedOrigins.includes(origin)) {
@@ -60,17 +60,20 @@ app.use(helmet());
 app.use(morgan('dev'));
 app.use(express.json());
 
-// ✅ 4. Route de test (pour debug)
+// ✅ 4. Route de test
 app.get('/', (req, res) => {
   res.json({ status: 'API is running.' });
 });
 
-// ✅ 5. Connexion DB
+// ✅ 5. Connexion à la base de données
 db.authenticate()
   .then(() => console.log('✅ Connected to the database.'))
-  .catch(err => console.error('❌ Database connection error:', err));
+  .catch(err => {
+    console.error('❌ Database connection error:', err.message);
+    process.exit(1); // Stopper l'application si DB inaccessible
+  });
 
-// ✅ 6. Définition des routes
+// ✅ 6. Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/superadmin', superAdminRoutes);
 app.use('/api/admin', adminRoutes);
@@ -84,9 +87,10 @@ app.use('/api/bookings', bookingRoutes);
 app.use('/api/auth/superadmin', authSuperAdminRoutes);
 
 // ✅ 7. Lancement du serveur
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 8080;
+console.log(`🎯 PORT from env: ${PORT}`);
+
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Server is running on port ${PORT}`);
 });
-
 
