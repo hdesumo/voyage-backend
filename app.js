@@ -5,8 +5,6 @@ const morgan = require('morgan');
 const dotenv = require('dotenv');
 const db = require('./config/database');
 
-dotenv.config(); // Charger les variables d'environnement en premier
-
 // Import des routes
 const authRoutes = require('./routes/authRoutes');
 const superAdminRoutes = require('./routes/superAdminRoutes');
@@ -18,11 +16,13 @@ const vehicleRoutes = require('./routes/vehicleRoutes');
 const passengerRoutes = require('./routes/passengerRoutes');
 const tripRoutes = require('./routes/tripRoutes');
 const bookingRoutes = require('./routes/bookingRoutes');
-const authSuperAdminRoutes = require('./routes/authSuperAdmin');
+const authSuperAdminRoutes = require('./routes/authSuperAdmin'); // ✅ Bien nommé
+
+dotenv.config();
 
 const app = express();
 
-// ✅ 1. CORS (en premier)
+// ✅ 1. CORS
 const allowedOrigins = [
   'https://superadmin.voyagemax.net',
   'http://localhost:5173'
@@ -43,7 +43,7 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
-// ✅ 2. Headers personnalisés pour Railway
+// ✅ 2. Headers CORS manuels
 app.use((req, res, next) => {
   const origin = req.headers.origin;
   if (allowedOrigins.includes(origin)) {
@@ -55,23 +55,20 @@ app.use((req, res, next) => {
   next();
 });
 
-// ✅ 3. Autres middlewares
+// ✅ 3. Middlewares
 app.use(helmet());
 app.use(morgan('dev'));
 app.use(express.json());
 
-// ✅ 4. Route de test
+// ✅ 4. Test route
 app.get('/', (req, res) => {
   res.json({ status: 'API is running.' });
 });
 
-// ✅ 5. Connexion à la base de données
+// ✅ 5. Connexion DB
 db.authenticate()
   .then(() => console.log('✅ Connected to the database.'))
-  .catch(err => {
-    console.error('❌ Database connection error:', err.message);
-    process.exit(1); // Stopper l'application si DB inaccessible
-  });
+  .catch(err => console.error('❌ Database connection error:', err));
 
 // ✅ 6. Routes
 app.use('/api/auth', authRoutes);
@@ -84,12 +81,11 @@ app.use('/api/vehicles', vehicleRoutes);
 app.use('/api/passengers', passengerRoutes);
 app.use('/api/trips', tripRoutes);
 app.use('/api/bookings', bookingRoutes);
-app.use('/api/auth/superadmin', authSuperAdminRoutes);
+app.use('/api/auth/superadmin', authSuperAdminRoutes); // ✅ Auth SuperAdmin ici
 
-// ✅ 7. Lancement du serveur
+// ✅ 7. Lancement serveur
 const PORT = process.env.PORT || 8080;
-console.log(`🎯 PORT from env: ${PORT}`);
-
+console.log('🎯 PORT from env:', PORT);
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Server is running on port ${PORT}`);
 });

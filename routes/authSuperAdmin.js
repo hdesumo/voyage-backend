@@ -1,9 +1,10 @@
+// routes/authSuperAdmin.js
+
 const express = require('express');
 const router = express.Router();
-const authController = require('../controllers/authController');
+const superAdminController = require('../controllers/superAdminController'); // ✅ Corrigé ici
 
-// ✅ Route unique pour le login SuperAdmin
-router.post('/login', authController.loginSuperAdmin);
+router.post('/login', superAdminController.loginSuperAdmin); // ✅ Fonction correcte
 
 module.exports = router;
 
