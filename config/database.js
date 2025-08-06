@@ -7,10 +7,10 @@ const sequelize = new Sequelize(process.env.DATABASE_URL, {
   dialectOptions: {
     ssl: {
       require: true,
-      rejectUnauthorized: false, // Important pour Railway
-    }
+      rejectUnauthorized: false, // pour Railway sinon SSL échoue
+    },
   },
-  logging: false, // ou true si tu veux voir les requêtes SQL en console
+  logging: false, // désactive les logs SQL (optionnel)
 });
 
 module.exports = sequelize;
