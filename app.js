@@ -1,3 +1,6 @@
+// Charger les variables d'environnement AVANT toute utilisation
+require('dotenv').config();
+
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -5,7 +8,7 @@ const morgan = require('morgan');
 const dotenv = require('dotenv');
 const db = require('./config/database');
 
-// Import routes
+// Import des routes
 const authRoutes = require('./routes/authRoutes');
 const superAdminRoutes = require('./routes/superAdminRoutes');
 const adminRoutes = require('./routes/adminRoutes');
@@ -16,13 +19,13 @@ const vehicleRoutes = require('./routes/vehicleRoutes');
 const passengerRoutes = require('./routes/passengerRoutes');
 const tripRoutes = require('./routes/tripRoutes');
 const bookingRoutes = require('./routes/bookingRoutes');
-const authSuperAdminRoutes = require('./routes/authSuperAdmin');
 
+// Charge les variables d'environnement
 dotenv.config();
 
 const app = express();
 
-// ✅ 1. CORS
+// ✅ 1. Configuration CORS
 const allowedOrigins = [
   'https://superadmin.voyagemax.net',
   'http://localhost:5173'
@@ -43,7 +46,7 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
-// ✅ 2. Headers manuels
+// ✅ 2. Headers CORS manuels (en complément)
 app.use((req, res, next) => {
   const origin = req.headers.origin;
   if (allowedOrigins.includes(origin)) {
@@ -55,27 +58,27 @@ app.use((req, res, next) => {
   next();
 });
 
-// ✅ 3. Sécurité & parsing
+// ✅ 3. Sécurité et parsing JSON
 app.use(helmet());
 app.use(morgan('dev'));
 app.use(express.json());
 
-// ✅ 4. Test route
+// ✅ 4. Route test
 app.get('/', (req, res) => {
   res.json({ status: 'API is running.' });
 });
 
-// ✅ 5. Database
+// ✅ 5. Connexion à la base de données
 db.authenticate()
   .then(() => {
     console.log('✅ Connected to the database.');
-    return db.sync({ alter: true }); // facultatif : { force: true } pour reset
+    return db.sync({ alter: true });
   })
   .then(() => console.log('✅ All models were synchronized.'))
   .catch(err => console.error('❌ Database error:', err));
 
-// ✅ 6. Routes
-app.use('/api/auth', authRoutes);
+// ✅ 6. Routes API
+app.use('/api/auth', authRoutes); // Auth général
 app.use('/api/superadmin', superAdminRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/enterprises', enterpriseRoutes);
@@ -85,7 +88,6 @@ app.use('/api/vehicles', vehicleRoutes);
 app.use('/api/passengers', passengerRoutes);
 app.use('/api/trips', tripRoutes);
 app.use('/api/bookings', bookingRoutes);
-app.use('/api/auth/superadmin', authSuperAdminRoutes);
 
 // ✅ 7. Lancement serveur
 const PORT = process.env.PORT || 8080;
