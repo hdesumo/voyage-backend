@@ -67,8 +67,16 @@ app.get('/', (req, res) => {
 
 // ✅ 5. Connexion DB
 db.authenticate()
-  .then(() => console.log('✅ Connected to the database.'))
-  .catch(err => console.error('❌ Database connection error:', err));
+  .then(() => {
+    console.log('✅ Connected to the database.');
+    return db.sync({ alter: true }); // Synchronise les modèles avec la base
+  })
+  .then(() => {
+    console.log('✅ All models were synchronized.');
+  })
+  .catch(err => {
+    console.error('❌ Database connection error:', err);
+  });
 
 // ✅ 6. Routes
 app.use('/api/auth', authRoutes);
