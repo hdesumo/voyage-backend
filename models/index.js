@@ -6,7 +6,7 @@ const db = {};
 db.Sequelize = Sequelize;
 db.sequelize = sequelize;
 
-// Importation des modèles
+// Importation des modèles (chaque modèle doit exporter une fonction)
 db.SuperAdmin = require('./SuperAdmin')(sequelize, Sequelize.DataTypes);
 db.Enterprise = require('./Enterprise')(sequelize, Sequelize.DataTypes);
 db.Admin = require('./Admin')(sequelize, Sequelize.DataTypes);

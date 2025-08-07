@@ -1,37 +1,41 @@
-const { DataTypes } = require('sequelize');
+const { Model, DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 
-const SuperAdmin = sequelize.define('SuperAdmin', {
-  id: {
-    type: DataTypes.UUID,
-    defaultValue: DataTypes.UUIDV4,
-    primaryKey: true,
-  },
-  fullname: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  email: {
-    type: DataTypes.STRING,
-    unique: true,
-    allowNull: false,
-    validate: {
-      isEmail: true,
+class SuperAdmin extends Model {}
+
+SuperAdmin.init(
+  {
+    id: {
+      type: DataTypes.UUID,
+      defaultValue: DataTypes.UUIDV4,
+      primaryKey: true,
+    },
+    fullname: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    email: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique: true,
+      validate: { isEmail: true },
+    },
+    password: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    status: {
+      type: DataTypes.ENUM('active', 'inactive'),
+      defaultValue: 'active',
     },
   },
-  password: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  status: {
-    type: DataTypes.ENUM('active', 'inactive'),
-    defaultValue: 'active',
-  },
-}, {
-  timestamps: true,
-  freezeTableName: true, // 🚨 Empêche Sequelize d'ajouter un "s" à la fin
-  tableName: 'SuperAdmins', // ✅ Correspond exactement au nom de la table
-});
+  {
+    sequelize,
+    modelName: 'SuperAdmin',
+    tableName: 'SuperAdmins',
+    timestamps: true,
+  }
+);
 
 module.exports = SuperAdmin;
 
