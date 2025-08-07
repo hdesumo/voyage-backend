@@ -45,6 +45,7 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
 
 // ✅ 2. Headers CORS manuels (en complément)
 app.use((req, res, next) => {
