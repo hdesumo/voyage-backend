@@ -1,7 +1,4 @@
-// models/Enterprise.js
-const { DataTypes } = require('sequelize');
-
-module.exports = (sequelize) => {
+module.exports = (sequelize, DataTypes) => {
   const Enterprise = sequelize.define('Enterprise', {
     id: {
       type: DataTypes.UUID,
@@ -20,21 +17,20 @@ module.exports = (sequelize) => {
       type: DataTypes.STRING,
       allowNull: false,
       unique: true,
-      validate: {
-        isEmail: true
-      }
+      validate: { isEmail: true }
     },
     phone: {
       type: DataTypes.STRING,
-      allowNull: true
+      allowNull: false
     },
     status: {
       type: DataTypes.ENUM('active', 'inactive'),
       defaultValue: 'active'
     }
   }, {
-    tableName: 'Enterprises',
-    timestamps: true
+    tableName: 'Enterprises', // 👈 casse respectée
+    timestamps: true,
+    underscored: true
   });
 
   return Enterprise;

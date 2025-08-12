@@ -1,38 +1,44 @@
 module.exports = (sequelize, DataTypes) => {
-  const Trip = sequelize.define("Trip", {
+  const Trip = sequelize.define('Trip', {
     id: {
       type: DataTypes.UUID,
       defaultValue: DataTypes.UUIDV4,
-      primaryKey: true,
+      primaryKey: true
     },
-    agency_from_id: {
+    enterprise_id: {
       type: DataTypes.UUID,
-      allowNull: false,
+      allowNull: false
     },
-    agency_to_id: {
-      type: DataTypes.UUID,
-      allowNull: false,
+    departure: {
+      type: DataTypes.STRING,
+      allowNull: false
     },
-    vehicle_id: {
-      type: DataTypes.UUID,
-      allowNull: false,
-    },
-    driver_id: {
-      type: DataTypes.UUID,
-      allowNull: false,
+    arrival: {
+      type: DataTypes.STRING,
+      allowNull: false
     },
     departure_time: {
       type: DataTypes.DATE,
-      allowNull: false,
+      allowNull: false
     },
-    arrival_time: {
-      type: DataTypes.DATE,
-      allowNull: true,
+    vehicle_id: {
+      type: DataTypes.UUID,
+      allowNull: false
+    },
+    driver_id: {
+      type: DataTypes.UUID,
+      allowNull: false
     },
     price: {
-      type: DataTypes.FLOAT,
-      allowNull: false,
-    },
+      type: DataTypes.DECIMAL(10, 2),
+      allowNull: false
+    }
+  }, {
+    tableName: 'Trips',
+    timestamps: true,
+    underscored: true
   });
+
   return Trip;
 };
+

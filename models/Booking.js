@@ -1,26 +1,32 @@
 module.exports = (sequelize, DataTypes) => {
-  const Booking = sequelize.define("Booking", {
+  const Booking = sequelize.define('Booking', {
     id: {
       type: DataTypes.UUID,
       defaultValue: DataTypes.UUIDV4,
-      primaryKey: true,
+      primaryKey: true
     },
     trip_id: {
       type: DataTypes.UUID,
-      allowNull: false,
+      allowNull: false
     },
     passenger_id: {
       type: DataTypes.UUID,
-      allowNull: false,
+      allowNull: false
     },
     seat_number: {
       type: DataTypes.INTEGER,
-      allowNull: false,
+      allowNull: false
     },
     status: {
-      type: DataTypes.ENUM("booked", "cancelled", "completed"),
-      defaultValue: "booked",
-    },
+      type: DataTypes.ENUM('confirmed', 'cancelled'),
+      defaultValue: 'confirmed'
+    }
+  }, {
+    tableName: 'Bookings',
+    timestamps: true,
+    underscored: true
   });
+
   return Booking;
 };
+

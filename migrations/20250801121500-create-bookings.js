@@ -1,8 +1,8 @@
 'use strict';
 
 module.exports = {
-  async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('bookings', {
+  up: async (queryInterface, Sequelize) => {
+    await queryInterface.createTable('Bookings', {
       id: {
         type: Sequelize.UUID,
         defaultValue: Sequelize.literal('uuid_generate_v4()'),
@@ -11,42 +11,27 @@ module.exports = {
       trip_id: {
         type: Sequelize.UUID,
         allowNull: false,
-        references: {
-          model: 'trips',
-          key: 'id'
-        },
+        references: { model: 'Trips', key: 'id' },
         onDelete: 'CASCADE'
       },
       passenger_id: {
         type: Sequelize.UUID,
         allowNull: false,
-        references: {
-          model: 'Passengers',
-          key: 'id'
-        },
+        references: { model: 'Passengers', key: 'id' },
         onDelete: 'CASCADE'
       },
-      seat_number: {
-        type: Sequelize.STRING,
-        allowNull: false
-      },
+      seat_number: Sequelize.INTEGER,
       status: {
-        type: Sequelize.ENUM('pending', 'confirmed', 'cancelled'),
-        defaultValue: 'pending'
+        type: Sequelize.ENUM('confirmed', 'cancelled'),
+        defaultValue: 'confirmed'
       },
-      created_at: {
-        type: Sequelize.DATE,
-        allowNull: false
-      },
-      updated_at: {
-        type: Sequelize.DATE,
-        allowNull: false
-      }
+      created_at: Sequelize.DATE,
+      updated_at: Sequelize.DATE
     });
   },
 
-  async down(queryInterface) {
-    await queryInterface.dropTable('bookings');
+  down: async (queryInterface) => {
+    await queryInterface.dropTable('Bookings');
   }
 };
 

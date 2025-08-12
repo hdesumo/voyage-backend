@@ -1,74 +1,42 @@
 'use strict';
 
 module.exports = {
-  async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('trips', {
+  up: async (queryInterface, Sequelize) => {
+    await queryInterface.createTable('Trips', {
       id: {
         type: Sequelize.UUID,
         defaultValue: Sequelize.literal('uuid_generate_v4()'),
-        primaryKey: true,
+        primaryKey: true
       },
       enterprise_id: {
         type: Sequelize.UUID,
         allowNull: false,
         references: { model: 'Enterprises', key: 'id' },
-        onDelete: 'CASCADE',
+        onDelete: 'CASCADE'
       },
-      agency_id: {
+      departure: Sequelize.STRING,
+      arrival: Sequelize.STRING,
+      departure_time: Sequelize.DATE,
+      vehicle_id: {
         type: Sequelize.UUID,
         allowNull: false,
-        references: { model: 'agencies', key: 'id' },
-        onDelete: 'CASCADE',
+        references: { model: 'Vehicles', key: 'id' },
+        onDelete: 'SET NULL'
       },
       driver_id: {
         type: Sequelize.UUID,
         allowNull: false,
-        references: { model: 'drivers', key: 'id' },
-        onDelete: 'CASCADE',
+        references: { model: 'Drivers', key: 'id' },
+        onDelete: 'SET NULL'
       },
-      vehicle_id: {
-        type: Sequelize.UUID,
-        allowNull: false,
-        references: { model: 'vehicles', key: 'id' },
-        onDelete: 'CASCADE',
-      },
-      origin: {
-        type: Sequelize.STRING,
-        allowNull: false,
-      },
-      destination: {
-        type: Sequelize.STRING,
-        allowNull: false,
-      },
-      departure_time: {
-        type: Sequelize.DATE,
-        allowNull: false,
-      },
-      arrival_time: {
-        type: Sequelize.DATE,
-        allowNull: false,
-      },
-      price: {
-        type: Sequelize.INTEGER,
-        allowNull: false,
-      },
-      status: {
-        type: Sequelize.ENUM('scheduled', 'completed', 'cancelled'),
-        defaultValue: 'scheduled',
-      },
-      created_at: {
-        type: Sequelize.DATE,
-        allowNull: false,
-      },
-      updated_at: {
-        type: Sequelize.DATE,
-        allowNull: false,
-      }
+      price: Sequelize.DECIMAL(10, 2),
+      created_at: Sequelize.DATE,
+      updated_at: Sequelize.DATE
     });
   },
 
-  async down(queryInterface) {
-    await queryInterface.dropTable('trips');
+  down: async (queryInterface) => {
+    await queryInterface.dropTable('Trips');
   }
 };
 

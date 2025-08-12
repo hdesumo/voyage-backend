@@ -2,7 +2,7 @@
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable('Vehicles', {
+    await queryInterface.createTable('Admins', {
       id: {
         type: Sequelize.UUID,
         defaultValue: Sequelize.literal('uuid_generate_v4()'),
@@ -14,23 +14,19 @@ module.exports = {
         references: { model: 'Enterprises', key: 'id' },
         onDelete: 'CASCADE'
       },
-      license_plate: {
+      fullname: Sequelize.STRING,
+      email: {
         type: Sequelize.STRING,
         unique: true
       },
-      model: Sequelize.STRING,
-      seats_count: Sequelize.INTEGER,
-      status: {
-        type: Sequelize.ENUM('active', 'inactive'),
-        defaultValue: 'active'
-      },
+      password: Sequelize.STRING,
       created_at: Sequelize.DATE,
       updated_at: Sequelize.DATE
     });
   },
 
   down: async (queryInterface) => {
-    await queryInterface.dropTable('Vehicles');
+    await queryInterface.dropTable('Admins');
   }
 };
 

@@ -1,21 +1,28 @@
-require('dotenv').config(); // Assure-toi d'avoir installé dotenv
+require('dotenv').config(); // Charge les variables d’environnement depuis .env
 
 module.exports = {
   development: {
-    username: process.env.DB_USERNAME || 'postgres',
-    password: process.env.DB_PASSWORD || null,
-    database: process.env.DB_NAME || 'voyagemax',
-    host: process.env.DB_HOST || '127.0.0.1',
+    use_env_variable: 'DATABASE_URL',
     dialect: 'postgres',
-    logging: false, // Désactive les logs SQL dans la console
+    logging: false
   },
+
+  test: {
+    use_env_variable: 'DATABASE_URL',
+    dialect: 'postgres',
+    logging: false
+  },
+
   production: {
-    username: process.env.DB_USERNAME,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME,
-    host: process.env.DB_HOST,
+    use_env_variable: 'DATABASE_URL',
     dialect: 'postgres',
     logging: false,
-  },
+    dialectOptions: {
+      ssl: {
+        require: true,
+        rejectUnauthorized: false
+      }
+    }
+  }
 };
 

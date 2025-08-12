@@ -5,10 +5,9 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
-const dotenv = require('dotenv');
 const db = require('./config/database');
 
-// Import des routes
+// --- Import des routes
 const authRoutes = require('./routes/authRoutes');
 const superAdminRoutes = require('./routes/superAdminRoutes');
 const adminRoutes = require('./routes/adminRoutes');
@@ -20,56 +19,66 @@ const passengerRoutes = require('./routes/passengerRoutes');
 const tripRoutes = require('./routes/tripRoutes');
 const bookingRoutes = require('./routes/bookingRoutes');
 
-// Charge les variables d'environnement
-dotenv.config();
-
 const app = express();
 
-// ✅ 1. Configuration CORS
-const allowedOrigins = [
-  'https://superadmin.voyagemax.net',
-  'http://localhost:5173'
-];
+/* =========================
+   C O R S   C O N F I G
+   ========================= */
+const allowedOrigins = (process.env.ALLOW_ORIGINS || '')
+  .split(',')
+  .map(s => s.trim())
+  .filter(Boolean);
 
 const corsOptions = {
-  origin: function (origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      console.error('❌ CORS blocked for origin:', origin);
-      callback(new Error('Not allowed by CORS'));
+  origin(origin, cb) {
+    // Autorise outils sans origin (Postman/cURL) + origins whitelistées
+    if (!origin || allowedOrigins.includes(origin) || allowedOrigins.includes('*')) {
+      return cb(null, true);
     }
+    console.error('❌ CORS blocked for origin:', origin);
+    return cb(new Error('Not allowed by CORS'));
   },
   credentials: true,
-  optionsSuccessStatus: 200
+  optionsSuccessStatus: 204
 };
 
 app.use(cors(corsOptions));
-app.options('*', cors(corsOptions));
+app.options('*', cors(corsOptions)); // preflight global
 
-// ✅ 2. Headers CORS manuels (en complément)
+// En-têtes additionnels utiles derrière proxy/CDN
 app.use((req, res, next) => {
-  const origin = req.headers.origin;
-  if (allowedOrigins.includes(origin)) {
-    res.header('Access-Control-Allow-Origin', origin);
+  const o = req.headers.origin;
+  if (!o || allowedOrigins.includes(o) || allowedOrigins.includes('*')) {
+    if (o) {
+      res.header('Access-Control-Allow-Origin', o);
+      res.header('Vary', 'Origin');
+    }
+    res.header('Access-Control-Allow-Credentials', 'true');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+    res.header('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE,OPTIONS');
+    // Expose si tu veux lire certains headers côté front (optionnel)
+    res.header('Access-Control-Expose-Headers', 'Content-Type, Authorization');
   }
-  res.header('Access-Control-Allow-Credentials', 'true');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  if (req.method === 'OPTIONS') return res.sendStatus(204);
   next();
 });
 
-// ✅ 3. Sécurité et parsing JSON
+/* =========================
+   M I D D L E W A R E S
+   ========================= */
 app.use(helmet());
 app.use(morgan('dev'));
 app.use(express.json());
 
-// ✅ 4. Route test
-app.get('/', (req, res) => {
-  res.json({ status: 'API is running.' });
-});
+/* =========================
+   H E A L T H C H E C K
+   ========================= */
+app.get('/', (_req, res) => res.json({ status: 'API is running.' }));
+app.get('/status', (_req, res) => res.json({ status: 'OK', ts: new Date().toISOString() }));
 
-// ✅ 5. Connexion à la base de données
+/* =========================
+   D A T A B A S E
+   ========================= */
 db.authenticate()
   .then(() => {
     console.log('✅ Connected to the database.');
@@ -78,8 +87,10 @@ db.authenticate()
   .then(() => console.log('✅ All models were synchronized.'))
   .catch(err => console.error('❌ Database error:', err));
 
-// ✅ 6. Routes API
-app.use('/api/auth', authRoutes); // Auth général
+/* =========================
+   R O U T E S
+   ========================= */
+app.use('/api/auth', authRoutes);
 app.use('/api/superadmin', superAdminRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/enterprises', enterpriseRoutes);
@@ -90,9 +101,10 @@ app.use('/api/passengers', passengerRoutes);
 app.use('/api/trips', tripRoutes);
 app.use('/api/bookings', bookingRoutes);
 
-// ✅ 7. Lancement serveur
+/* =========================
+   S E R V E R
+   ========================= */
 const PORT = process.env.PORT || 8080;
-console.log('🎯 PORT from env:', PORT);
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Server is running on port ${PORT}`);
 });
